@@ -12,8 +12,7 @@ void CHDRPlus_Forward::Forward(MultiUshortImage *InRawImage, MultiUcharImage *Ou
 	if (m_nBlockMatchFusionEnable)
 	{
 		m_HDRPlus_BlockMatchFusion.Forward(InRawImage, nFrameID, Framenum, pControl);
-		// if (m_HDRPlus_BlockMatchFusion.m_bDumpFileEnable)
-		if (1)
+		if (m_HDRPlus_BlockMatchFusion.m_bDumpFileEnable)
 		{
 			InRawImage[0].SaveSingleChannelToBitmapFile("outbmp/BlockMatchFusion.bmp", 0, InRawImage[0].GetMaxVal(), 256, 0);
 		}

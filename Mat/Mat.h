@@ -4,42 +4,53 @@
 #include "Common.h"
 #include "MemPool.h"
 #include "YUVToJpeg.h"
+#include <cstdio>
+#include <cstdint>
+#include <cstring>
+
 #ifndef _WIN32
 #define BI_RGB 0L
-typedef struct __attribute__((packed))
+
+#pragma pack(push, 1)
+struct BITMAPFILEHEADER
 {
-	unsigned short bfType;
-	unsigned long bfSize;
-	unsigned short bfReserved1;
-	unsigned short bfReserved2;
-	unsigned long bfOffBits;
-} BITMAPFILEHEADER;
-typedef struct __attribute__((packed))
+	uint16_t bfType;
+	uint32_t bfSize;
+	uint16_t bfReserved1;
+	uint16_t bfReserved2;
+	uint32_t bfOffBits;
+};
+
+struct BITMAPINFOHEADER
 {
-	unsigned long biSize;
-	long biWidth;
-	long biHeight;
-	unsigned short biPlanes;
-	unsigned short biBitCount;
-	unsigned long biCompression;
-	unsigned long biSizeImage;
-	long biXPelsPerMeter;
-	long biYPelsPerMeter;
-	unsigned long biClrUsed;
-	unsigned long biClrImportant;
-} BITMAPINFOHEADER;
-typedef struct tagRGBQUAD
+	uint32_t biSize;
+	int32_t biWidth;
+	int32_t biHeight;
+	uint16_t biPlanes;
+	uint16_t biBitCount;
+	uint32_t biCompression;
+	uint32_t biSizeImage;
+	int32_t biXPelsPerMeter;
+	int32_t biYPelsPerMeter;
+	uint32_t biClrUsed;
+	uint32_t biClrImportant;
+};
+#pragma pack(pop)
+
+typedef struct
 {
-	unsigned char rgbBlue;
-	unsigned char rgbGreen;
-	unsigned char rgbRed;
-	unsigned char rgbReserved;
+	uint8_t rgbBlue;
+	uint8_t rgbGreen;
+	uint8_t rgbRed;
+	uint8_t rgbReserved;
 } RGBQUAD;
+
 typedef struct __attribute__((packed))
 {
 	BITMAPINFOHEADER bmiHeader;
 	RGBQUAD bmiColors[1];
 } BITMAPINFO;
+
 #endif
 
 template <class T>

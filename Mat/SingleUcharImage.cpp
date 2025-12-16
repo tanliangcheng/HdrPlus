@@ -1379,69 +1379,134 @@ bool SingleUcharImage::ResizeNearestNeighborImage(SingleUcharImage *pOutImage, i
 	}
 	return true;
 }
+// bool SingleUcharImage::SaveGrayToBitmapFile(char *pFileName)
+// {
+// 	int i, j;
+// 	BITMAPFILEHEADER BmpFileHdr;
+// 	BITMAPINFO *pInfo;
+// 	long nBitsSize, nBISize;
+// 	FILE *fp = fopen(pFileName, "wb");
+// 	if (fp == NULL)
+// 		return false;
+// 	nBISize = sizeof(BITMAPINFOHEADER);
+// 	pInfo = (BITMAPINFO *)malloc(nBISize);
+// 	pInfo->bmiHeader.biBitCount = 24;
+// 	pInfo->bmiHeader.biWidth = m_nWidth;
+// 	pInfo->bmiHeader.biHeight = m_nHeight;
+// 	pInfo->bmiHeader.biCompression = BI_RGB;
+// 	pInfo->bmiHeader.biSizeImage = 0;
+// 	pInfo->bmiHeader.biPlanes = 1;
+// 	pInfo->bmiHeader.biClrImportant = 0;
+// 	pInfo->bmiHeader.biClrUsed = 0;
+// 	pInfo->bmiHeader.biXPelsPerMeter = 75;
+// 	pInfo->bmiHeader.biYPelsPerMeter = 75;
+// 	pInfo->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+// 	int nPitch = (m_nWidth * 24 + 31) / 32 * 4;
+// 	nBitsSize = nPitch * m_nHeight;
+// 	BmpFileHdr.bfType = 0x4D42; // 'BM'
+// 	BmpFileHdr.bfSize = sizeof(BITMAPFILEHEADER) + nBISize + nBitsSize;
+// 	BmpFileHdr.bfReserved1 = 0;
+// 	BmpFileHdr.bfReserved2 = 0;
+// 	BmpFileHdr.bfOffBits = sizeof(BITMAPFILEHEADER) + nBISize;
+// 	if (fwrite(&BmpFileHdr, 1, sizeof(BITMAPFILEHEADER), fp) != sizeof(BITMAPFILEHEADER))
+// 	{
+// 		fclose(fp);
+// 		free(pInfo);
+// 		return false;
+// 	}
+// 	if (fwrite(pInfo, 1, nBISize, fp) != (unsigned long)nBISize)
+// 	{
+// 		fclose(fp);
+// 		free(pInfo);
+// 		return false;
+// 	}
+// 	unsigned char *pBuffer = new unsigned char[nPitch];
+// 	for (i = 0; i < m_nHeight; i++)
+// 	{
+// 		unsigned char *pScanLine = GetImageLine(m_nHeight - 1 - i);
+// 		for (j = 0; j < m_nWidth; j++)
+// 		{
+// 			unsigned char g = pScanLine[j];
+// 			pBuffer[j * 3] = pBuffer[j * 3 + 1] = pBuffer[j * 3 + 2] = g;
+// 		}
+// 		if (fwrite(pBuffer, 1, nPitch, fp) != (unsigned long)nPitch)
+// 		{
+// 			fclose(fp);
+// 			free(pInfo);
+// 			delete[] pBuffer;
+// 			return false;
+// 		}
+// 	}
+// 	delete[] pBuffer;
+// 	fclose(fp);
+// 	free(pInfo);
+// 	return true;
+// }
+
 bool SingleUcharImage::SaveGrayToBitmapFile(char *pFileName)
 {
-	int i, j;
-	BITMAPFILEHEADER BmpFileHdr;
-	BITMAPINFO *pInfo;
-	long nBitsSize, nBISize;
 	FILE *fp = fopen(pFileName, "wb");
-	if (fp == NULL)
+	if (!fp)
 		return false;
-	nBISize = sizeof(BITMAPINFOHEADER);
-	pInfo = (BITMAPINFO *)malloc(nBISize);
-	pInfo->bmiHeader.biBitCount = 24;
-	pInfo->bmiHeader.biWidth = m_nWidth;
-	pInfo->bmiHeader.biHeight = m_nHeight;
-	pInfo->bmiHeader.biCompression = BI_RGB;
-	pInfo->bmiHeader.biSizeImage = 0;
-	pInfo->bmiHeader.biPlanes = 1;
-	pInfo->bmiHeader.biClrImportant = 0;
-	pInfo->bmiHeader.biClrUsed = 0;
-	pInfo->bmiHeader.biXPelsPerMeter = 75;
-	pInfo->bmiHeader.biYPelsPerMeter = 75;
-	pInfo->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-	int nPitch = (m_nWidth * 24 + 31) / 32 * 4;
-	nBitsSize = nPitch * m_nHeight;
-	BmpFileHdr.bfType = 0x4D42; // 'BM'
-	BmpFileHdr.bfSize = sizeof(BITMAPFILEHEADER) + nBISize + nBitsSize;
-	BmpFileHdr.bfReserved1 = 0;
-	BmpFileHdr.bfReserved2 = 0;
-	BmpFileHdr.bfOffBits = sizeof(BITMAPFILEHEADER) + nBISize;
-	if (fwrite(&BmpFileHdr, 1, sizeof(BITMAPFILEHEADER), fp) != sizeof(BITMAPFILEHEADER))
+
+	int width = m_nWidth;
+	int height = m_nHeight;
+
+	// 每行字节数，4字节对齐
+	int nPitch = (width * 3 + 3) & ~3;
+	uint32_t imageSize = nPitch * height;
+
+	// 文件头
+	BITMAPFILEHEADER fileHeader;
+	fileHeader.bfType = 0x4D42; // 'BM'
+	fileHeader.bfOffBits = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
+	fileHeader.bfSize = fileHeader.bfOffBits + imageSize;
+	fileHeader.bfReserved1 = 0;
+	fileHeader.bfReserved2 = 0;
+
+	// 信息头
+	BITMAPINFOHEADER infoHeader;
+	std::memset(&infoHeader, 0, sizeof(infoHeader));
+	infoHeader.biSize = sizeof(BITMAPINFOHEADER);
+	infoHeader.biWidth = width;
+	infoHeader.biHeight = height;
+	infoHeader.biPlanes = 1;
+	infoHeader.biBitCount = 24;
+	infoHeader.biCompression = 0; // BI_RGB
+	infoHeader.biSizeImage = imageSize;
+	infoHeader.biXPelsPerMeter = 3780; // 96 dpi
+	infoHeader.biYPelsPerMeter = 3780;
+	infoHeader.biClrUsed = 0;
+	infoHeader.biClrImportant = 0;
+
+	// 写文件头
+	fwrite(&fileHeader, sizeof(fileHeader), 1, fp);
+	fwrite(&infoHeader, sizeof(infoHeader), 1, fp);
+
+	// 写像素数据
+	unsigned char *rowBuffer = new unsigned char[nPitch];
+	for (int i = 0; i < height; i++)
 	{
-		fclose(fp);
-		free(pInfo);
-		return false;
-	}
-	if (fwrite(pInfo, 1, nBISize, fp) != (unsigned long)nBISize)
-	{
-		fclose(fp);
-		free(pInfo);
-		return false;
-	}
-	unsigned char *pBuffer = new unsigned char[nPitch];
-	for (i = 0; i < m_nHeight; i++)
-	{
-		unsigned char *pScanLine = GetImageLine(m_nHeight - 1 - i);
-		for (j = 0; j < m_nWidth; j++)
+		unsigned char *pScanLine = GetImageLine(height - 1 - i); // BMP倒序
+		for (int j = 0; j < width; j++)
 		{
 			unsigned char g = pScanLine[j];
-			pBuffer[j * 3] = pBuffer[j * 3 + 1] = pBuffer[j * 3 + 2] = g;
+			rowBuffer[j * 3] = g;	  // B
+			rowBuffer[j * 3 + 1] = g; // G
+			rowBuffer[j * 3 + 2] = g; // R
 		}
-		if (fwrite(pBuffer, 1, nPitch, fp) != (unsigned long)nPitch)
-		{
-			fclose(fp);
-			free(pInfo);
-			delete[] pBuffer;
-			return false;
-		}
+		// 填充剩余字节
+		for (int j = width * 3; j < nPitch; j++)
+			rowBuffer[j] = 0;
+
+		fwrite(rowBuffer, 1, nPitch, fp);
 	}
-	delete[] pBuffer;
+
+	delete[] rowBuffer;
 	fclose(fp);
-	free(pInfo);
 	return true;
 }
+
 bool SingleUcharImage::LoadBitmapFileToGray(char *pFileName)
 {
 	int i, j;

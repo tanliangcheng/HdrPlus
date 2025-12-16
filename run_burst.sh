@@ -4,7 +4,7 @@ BASE_DIR=/home/tanliangcheng/HdrPlus
 RAW_DIR=${BASE_DIR}/data/hdr_plus_examples/RAWs
 OUTPUT_DIR=${BASE_DIR}/outbmp
 
-BURST_NAME=burst23
+BURST_NAME=burst36
 FRAME_NUM=8   # burst23_0 ~ burst23_7
 
 cmake -B build 

@@ -18,7 +18,7 @@ bool MultiUshortImage::CreateImage(int width, int height, int bits)
 	m_nRawBLC = 0;
 	return SetImageSize(width, height, 1);
 }
-bool MultiUshortImage::CreateImage(int width, int height,int dim, int bits)
+bool MultiUshortImage::CreateImage(int width, int height, int dim, int bits)
 {
 	m_nRawBits = bits;
 	m_nRawMAXS = (1 << bits) - 1;
@@ -35,13 +35,14 @@ bool MultiUshortImage::Clone(MultiUshortImage *pInputImage)
 	m_nRawMAXS = pInputImage->m_nRawMAXS;
 	m_nRawBLC = pInputImage->m_nRawBLC;
 	CopyParameters(pInputImage);
-	memcpy(m_pImgData, pInputImage->GetImageData(), sizeof(unsigned short)*nSize);
+	memcpy(m_pImgData, pInputImage->GetImageData(), sizeof(unsigned short) * nSize);
 	return true;
 }
-bool MultiUshortImage::CreateImageWithData(int nWidth, int nHeight,int nDim, unsigned short *pInputData)
+bool MultiUshortImage::CreateImageWithData(int nWidth, int nHeight, int nDim, unsigned short *pInputData)
 {
-	if (!SetImageSize(nWidth, nHeight, nDim))return false;
-	memcpy(GetImageData(), pInputData, nWidth*nHeight*nDim*sizeof(unsigned short));
+	if (!SetImageSize(nWidth, nHeight, nDim))
+		return false;
+	memcpy(GetImageData(), pInputData, nWidth * nHeight * nDim * sizeof(unsigned short));
 	return true;
 }
 void MultiUshortImage::CopyParameters(MultiUshortImage *pInputImage)
@@ -60,7 +61,8 @@ void MultiUshortImage::CopyParameters(MultiUshortImage *pInputImage)
 bool MultiUshortImage::BGRHToBGR(MultiUshortImage *pOutBGRImage)
 {
 	int i, x, y, g;
-	if (!pOutBGRImage->CreateImage(m_nWidth, m_nHeight, 3))return false;
+	if (!pOutBGRImage->CreateImage(m_nWidth, m_nHeight, 3))
+		return false;
 	pOutBGRImage->m_nRawMAXS = m_nRawMAXS;
 	for (y = 0; y < m_nHeight; y++)
 	{
@@ -75,8 +77,10 @@ bool MultiUshortImage::BGRHToBGR(MultiUshortImage *pOutBGRImage)
 				{
 					g += pInLine[3];
 				}
-				if (g < 0)g = 0;
-				if (g > m_nRawMAXS)g = m_nRawMAXS;
+				if (g < 0)
+					g = 0;
+				if (g > m_nRawMAXS)
+					g = m_nRawMAXS;
 				*(pOutLine++) = (unsigned short)g;
 			}
 			pInLine += m_nChannel;
@@ -87,8 +91,9 @@ bool MultiUshortImage::BGRHToBGR(MultiUshortImage *pOutBGRImage)
 bool MultiUshortImage::GetBGGRMean(double fMean[])
 {
 	int i, j, x, y, Y;
-	int C = (m_nWidth*m_nHeight) >> 2;
-	if (m_nWidth < 2 || m_nHeight < 2 ||  m_nRawCFA>3)return false;
+	int C = (m_nWidth * m_nHeight) >> 2;
+	if (m_nWidth < 2 || m_nHeight < 2 || m_nRawCFA > 3)
+		return false;
 	unsigned short *pCFA = m_pImgData;
 	fMean[0] = fMean[1] = fMean[2] = fMean[3] = 0;
 	for (y = 0, i = m_nRawCFA & 2; y < m_nHeight; y++, i ^= 2)
@@ -105,18 +110,20 @@ bool MultiUshortImage::GetBGGRMean(double fMean[])
 	fMean[3] /= C;
 	return true;
 }
-bool MultiUshortImage::Extend2Image(MultiUshortImage *pInImage, MultiUshortImage *pOutImage,int nS)//2µÄx´Î·½
+bool MultiUshortImage::Extend2Image(MultiUshortImage *pInImage, MultiUshortImage *pOutImage, int nS) // 2ï¿½ï¿½xï¿½Î·ï¿½
 {
-	if (nS < 0)return false;
+	if (nS < 0)
+		return false;
 	int nMask = (1 << nS) - 1;
 	int nInWidth = pInImage->GetImageWidth();
 	int nInHeight = pInImage->GetImageHeight();
 	int nDim = GetImageDim();
-	int nOutWidth = nInWidth + (((1 << nS) - (nInWidth&nMask))&nMask);
-	int nOutHeight = nInHeight + (((1 << nS) - (nInHeight&nMask))&nMask);
+	int nOutWidth = nInWidth + (((1 << nS) - (nInWidth & nMask)) & nMask);
+	int nOutHeight = nInHeight + (((1 << nS) - (nInHeight & nMask)) & nMask);
 	if (pOutImage->GetImageWidth() != nOutWidth || pOutImage->GetImageHeight() != nOutHeight)
 	{
-		if (!pOutImage->CreateImage(nOutWidth, nOutHeight, nDim,16))return false;
+		if (!pOutImage->CreateImage(nOutWidth, nOutHeight, nDim, 16))
+			return false;
 	}
 	FillWordData(pInImage->GetImageData(), pOutImage->GetImageData(), nInWidth, nInHeight, nOutWidth, nOutHeight, nDim);
 	return true;
@@ -135,7 +142,8 @@ bool MultiUshortImage::DownScaleImagex2(MultiUshortImage *pOutImage, bool bDithe
 		nWidth = pInImage->GetImageWidth();
 		nHeight = pInImage->GetImageHeight();
 	}
-	if (!pOutImage->CreateImage(nWidth >> 1, nHeight >> 1, nDim, 16))return false;
+	if (!pOutImage->CreateImage(nWidth >> 1, nHeight >> 1, nDim, 16))
+		return false;
 	return DownScaleWordDatax2(GetImageData(), pOutImage->GetImageData(), nWidth, nHeight, nDim, bDitheringEnable);
 }
 bool MultiUshortImage::UpScaleImagex2(MultiUshortImage *pOutImage, bool bDitheringEnable = false)
@@ -143,7 +151,8 @@ bool MultiUshortImage::UpScaleImagex2(MultiUshortImage *pOutImage, bool bDitheri
 	int nWidth = GetImageWidth();
 	int nHeight = GetImageHeight();
 	int nDim = GetImageDim();
-	if (!pOutImage->CreateImage(nWidth * 2, nHeight * 2, nDim,16))return false;
+	if (!pOutImage->CreateImage(nWidth * 2, nHeight * 2, nDim, 16))
+		return false;
 	return UpScaleWordDatax2(GetImageData(), pOutImage->GetImageData(), nWidth, nHeight, nDim);
 }
 
@@ -154,8 +163,10 @@ bool MultiUshortImage::SubtractEdgeImage(MultiUshortImage *pInImage, MultiShortI
 	int nDim = GetImageDim();
 	int nWidth1 = pInImage->GetImageWidth();
 	int nHeight1 = pInImage->GetImageHeight();
-	if (nWidth1 < nWidth0 || nHeight1 < nHeight0)return false;
-	if (!pOutImage->CreateImage(nWidth0, nHeight0, 1))return false;
+	if (nWidth1 < nWidth0 || nHeight1 < nHeight0)
+		return false;
+	if (!pOutImage->CreateImage(nWidth0, nHeight0, 1))
+		return false;
 	SubtractWordEdgeData(GetImageData(), pInImage->GetImageData(), pOutImage->GetImageData(), nWidth0, nHeight0, nWidth1, nHeight1, nDim);
 	return true;
 }
@@ -166,15 +177,17 @@ bool MultiUshortImage::AddBackEdgeImage(MultiUshortImage *pInputImage, MultiShor
 	int nDim = pInputImage->GetImageDim();
 	int nEdgeWidth = pInputEdgeImage->GetImageWidth();
 	int nEdgeHeight = pInputEdgeImage->GetImageHeight();
-	if (nEdgeWidth > nWidth || nEdgeHeight > nHeight || pInputEdgeImage->GetImageDim() != 1)return false;
-	if (!this->CreateImage(nEdgeWidth, nEdgeHeight, nDim,16))return false;
+	if (nEdgeWidth > nWidth || nEdgeHeight > nHeight || pInputEdgeImage->GetImageDim() != 1)
+		return false;
+	if (!this->CreateImage(nEdgeWidth, nEdgeHeight, nDim, 16))
+		return false;
 	AddBackWordEdge(pInputImage->GetImageData(), pInputEdgeImage->GetImageData(), GetImageData(), nWidth, nHeight, nEdgeWidth, nEdgeHeight, nDim);
 	return true;
 }
-bool MultiUshortImage::GaussPyramidImage(MultiUshortImage *pOutPyramid, MultiShortImage *pOutEdgePyramid, int &nPyramidLevel,bool SaveEdge)
+bool MultiUshortImage::GaussPyramidImage(MultiUshortImage *pOutPyramid, MultiShortImage *pOutEdgePyramid, int &nPyramidLevel, bool SaveEdge)
 {
 	int nWidth[12], nHeight[12];
-	MultiUshortImage  TempImage;
+	MultiUshortImage TempImage;
 	printf("input nPyramidLevel=%d\n", nPyramidLevel);
 	pOutPyramid[0].Clone(this);
 	for (int i = 0; i < nPyramidLevel; i++)
@@ -187,28 +200,32 @@ bool MultiUshortImage::GaussPyramidImage(MultiUshortImage *pOutPyramid, MultiSho
 			nPyramidLevel = i;
 			printf("out PyramidLevel=%d\n", nPyramidLevel);
 			break;
-		}	
+		}
 		if ((nWidth[i] & 1) == 1 || (nHeight[i] & 1) == 1)
 		{
-			MultiUshortImage  tmpExtendImage;
-			if (!pOutPyramid[i].Extend2Image(&pOutPyramid[i], &tmpExtendImage, 1))return false;
+			MultiUshortImage tmpExtendImage;
+			if (!pOutPyramid[i].Extend2Image(&pOutPyramid[i], &tmpExtendImage, 1))
+				return false;
 			pOutPyramid[i].Clone(&tmpExtendImage);
 		}
-		if (!pOutPyramid[i].DownScaleImagex2(&pOutPyramid[i + 1], false))return false;
-		if (SaveEdge==true)
+		if (!pOutPyramid[i].DownScaleImagex2(&pOutPyramid[i + 1], false))
+			return false;
+		if (SaveEdge == true)
 		{
-			if (!pOutPyramid[i + 1].UpScaleImagex2(&TempImage, false))return false;
-			if (!pOutPyramid[i].SubtractEdgeImage(&TempImage, pOutEdgePyramid + i))return false;
+			if (!pOutPyramid[i + 1].UpScaleImagex2(&TempImage, false))
+				return false;
+			if (!pOutPyramid[i].SubtractEdgeImage(&TempImage, pOutEdgePyramid + i))
+				return false;
 		}
 	}
 	return true;
 }
-bool MultiUshortImage::ApplyWeight(MultiUshortImage *pWeightImage,int ScaleBit)
+bool MultiUshortImage::ApplyWeight(MultiUshortImage *pWeightImage, int ScaleBit)
 {
 	int nWidth = GetImageWidth();
 	int nHeight = GetImageHeight();
 	int nDim = GetImageDim();
-	for (int y=0;y<nHeight;y++)
+	for (int y = 0; y < nHeight; y++)
 	{
 		unsigned short *pInLine = GetImageLine(y);
 		unsigned short *pInWeightLine = pWeightImage->GetImageLine(y);
@@ -216,9 +233,9 @@ bool MultiUshortImage::ApplyWeight(MultiUshortImage *pWeightImage,int ScaleBit)
 		{
 			for (int c = 0; c < nDim; c++)
 			{
-				unsigned int tmpOut = pInLine[c] * pInWeightLine[c];//x^16 *x^12=2^28;
+				unsigned int tmpOut = pInLine[c] * pInWeightLine[c]; // x^16 *x^12=2^28;
 				tmpOut >>= ScaleBit;
-				pInLine[c] =CLIP(tmpOut, 0, 65535);
+				pInLine[c] = CLIP(tmpOut, 0, 65535);
 			}
 			pInLine += nDim;
 			pInWeightLine += nDim;
@@ -226,7 +243,7 @@ bool MultiUshortImage::ApplyWeight(MultiUshortImage *pWeightImage,int ScaleBit)
 	}
 	return true;
 }
-bool MultiUshortImage::FuseDiffImageWeight(MultiUshortImage *pRefImage,MultiUshortImage *pWeightImage, int ScaleBit)
+bool MultiUshortImage::FuseDiffImageWeight(MultiUshortImage *pRefImage, MultiUshortImage *pWeightImage, int ScaleBit)
 {
 	int nWidth = GetImageWidth();
 	int nHeight = GetImageHeight();
@@ -240,7 +257,7 @@ bool MultiUshortImage::FuseDiffImageWeight(MultiUshortImage *pRefImage,MultiUsho
 		{
 			for (int c = 0; c < nDim; c++)
 			{
-				int tmpOut=(pInLine[c] - pRefLine[c])*pInWeightLine[c];
+				int tmpOut = (pInLine[c] - pRefLine[c]) * pInWeightLine[c];
 				tmpOut >>= ScaleBit;
 				pInLine[c] = CLIP(tmpOut, 0, 65535);
 			}
@@ -264,7 +281,7 @@ bool MultiUshortImage::AddImage(MultiUshortImage *pRefImage)
 		{
 			for (int c = 0; c < nDim; c++)
 			{
-				int tmpOut= pInLine[0] + pInRefLine[0];
+				int tmpOut = pInLine[0] + pInRefLine[0];
 				pInLine[c] = CLIP(tmpOut, 0, 65535);
 			}
 			pInLine += nDim;
@@ -278,12 +295,12 @@ bool MultiUshortImage::AddImage(MultiShortImage *pRefImage)
 	int nWidth = GetImageWidth();
 	int nHeight = GetImageHeight();
 	int nDim = GetImageDim();
-	#pragma omp parallel for  
+#pragma omp parallel for
 	for (int y = 0; y < nHeight; y++)
 	{
 		unsigned short *pInLine = GetImageLine(y);
 		short *pInRefLine = pRefImage->GetImageLine(y);
-		if (nDim==1)
+		if (nDim == 1)
 		{
 			for (int x = 0; x < nWidth; x++)
 			{
@@ -312,7 +329,7 @@ bool MultiUshortImage::AddImage(MultiShortImage *pRefImage)
 }
 bool MultiUshortImage::NormalizeByOutBlcAndBit(MultiUshortImage *pInImage, int m_nOutputBLC, int m_nOutputBits)
 {
-	//int x, y, CFA, E[2];
+	// int x, y, CFA, E[2];
 	int nWidth = pInImage->GetImageWidth();
 	int nHeight = pInImage->GetImageHeight();
 	int nMAXS = (1 << m_nOutputBits) - 1;
@@ -325,7 +342,7 @@ bool MultiUshortImage::NormalizeByOutBlcAndBit(MultiUshortImage *pInImage, int m
 	pInImage->m_nRawBLC = m_nOutputBLC;
 	pInImage->m_nRawBits = m_nOutputBits;
 	int nThread = omp_get_num_procs();
-#pragma omp parallel for num_threads(nThread) schedule(dynamic,16)
+#pragma omp parallel for num_threads(nThread) schedule(dynamic, 16)
 	for (int y = 0; y < nHeight; y++)
 	{
 		int x, CFA, E[2];
@@ -335,20 +352,24 @@ bool MultiUshortImage::NormalizeByOutBlcAndBit(MultiUshortImage *pInImage, int m
 		{
 			CFA = *pLine;
 			CFA = CFA * nGain + nOffset;
-			if (CFA < 0)CFA = 0;
+			if (CFA < 0)
+				CFA = 0;
 			CFA += E[0];
 			E[0] = CFA & 1023;
 			CFA >>= 10;
-			if (CFA > nMAXS)CFA = nMAXS;
+			if (CFA > nMAXS)
+				CFA = nMAXS;
 			*(pLine++) = (unsigned short)CFA;
 
 			CFA = *pLine;
 			CFA = CFA * nGain + nOffset;
-			if (CFA < 0)CFA = 0;
+			if (CFA < 0)
+				CFA = 0;
 			CFA += E[1];
 			E[1] = CFA & 1023;
 			CFA >>= 10;
-			if (CFA > nMAXS)CFA = nMAXS;
+			if (CFA > nMAXS)
+				CFA = nMAXS;
 			*(pLine++) = (unsigned short)CFA;
 		}
 	}
@@ -362,7 +383,7 @@ void MultiUshortImage::NormalizeBit(int nNewBit)
 		m_nRawMAXS = (1 << nNewBit) - 1;
 		m_nRawBLC = m_nRawBLC >> nShift;
 		m_nRawBits = nNewBit;
-#pragma omp parallel for schedule(dynamic,8)
+#pragma omp parallel for schedule(dynamic, 8)
 		for (int y = 0; y < m_nHeight; y++)
 		{
 			unsigned short *pY = m_pImgData + y * m_nWidth;
@@ -370,7 +391,8 @@ void MultiUshortImage::NormalizeBit(int nNewBit)
 			{
 				int Y = *pY;
 				Y >>= nShift;
-				if (Y > m_nRawMAXS)Y = m_nRawMAXS;
+				if (Y > m_nRawMAXS)
+					Y = m_nRawMAXS;
 				*(pY++) = (unsigned short)Y;
 			}
 		}
@@ -385,8 +407,8 @@ void MultiUshortImage::NormalizeBit(int nNewBit)
 #ifdef USE_NEON
 		uint16x8_t vnMask = vdupq_n_u16(nMask);
 		uint16x8_t vnMAXS = vdupq_n_u16(m_nRawMAXS);
-#endif 
-#pragma omp parallel for  schedule(dynamic,32)
+#endif
+#pragma omp parallel for schedule(dynamic, 32)
 		for (int y = 0; y < m_nHeight; y++)
 		{
 			unsigned short *pY = m_pImgData + y * m_nWidth;
@@ -400,7 +422,8 @@ void MultiUshortImage::NormalizeBit(int nNewBit)
 					vData = vshlq_n_u16(vData, 2);
 					vData = vorrq_u16(vData, vnMask);
 					vData = vminq_u16(vData, vnMAXS);
-					vst1q_u16(pY, vData);   pY += 8;
+					vst1q_u16(pY, vData);
+					pY += 8;
 				}
 			}
 			else
@@ -415,12 +438,13 @@ void MultiUshortImage::NormalizeBit(int nNewBit)
 					vst1q_u16(pY, vData);   pY += 8;
 				}*/
 			}
-#endif 
+#endif
 			for (; x < m_nWidth; x++)
 			{
 				int Y = *pY;
 				Y = (Y << nShift) | nMask;
-				if (Y > m_nRawMAXS)Y = m_nRawMAXS;
+				if (Y > m_nRawMAXS)
+					Y = m_nRawMAXS;
 				*(pY++) = (unsigned short)Y;
 			}
 		}
@@ -439,7 +463,7 @@ int MultiUshortImage::GetRAWStride(int nWidth, int nMIPIRAW)
 	}
 	else if (nMIPIRAW == 2)
 	{
-		stride = (((nWidth * 5) >> 2) + 8)&(~7);
+		stride = (((nWidth * 5) >> 2) + 8) & (~7);
 	}
 	else if (nMIPIRAW == 3)
 	{
@@ -465,7 +489,7 @@ bool MultiUshortImage::ConverterRawDataToISPRawData(char *pInputRawData, int nWi
 	}
 	else if (nMIPIRAW == 2)
 	{
-		stride = (((nWidth * 5) >> 2) + 8)&(~7);
+		stride = (((nWidth * 5) >> 2) + 8) & (~7);
 	}
 	else if (nMIPIRAW == 3)
 	{
@@ -481,7 +505,8 @@ bool MultiUshortImage::ConverterRawDataToISPRawData(char *pInputRawData, int nWi
 		int x, y, g;
 		int mask = (1 << nBits) - 1;
 		int shift = (16 - nBits);
-		if (!CreateImage(nWidth, nHeight, nBits))return false;
+		if (!CreateImage(nWidth, nHeight, nBits))
+			return false;
 		for (y = 0; y < nHeight; y++)
 		{
 			unsigned short *RawLine = (unsigned short *)(pInputRawData + y * nWidth);
@@ -493,7 +518,8 @@ bool MultiUshortImage::ConverterRawDataToISPRawData(char *pInputRawData, int nWi
 				{
 					g = ((g >> 8) & 255) | ((g & 255) << 8);
 				}
-				if (bHighBit)g = g >> shift;
+				if (bHighBit)
+					g = g >> shift;
 				if (g > mask)
 				{
 					printf("Pos [%d,%d] Pixel %d>%d\n", x, y, g, mask);
@@ -506,13 +532,14 @@ bool MultiUshortImage::ConverterRawDataToISPRawData(char *pInputRawData, int nWi
 	}
 	else if (nMIPIRAW == 1)
 	{
-		//RAW 10
+		// RAW 10
 		int i, j, g[4];
 		unsigned char Buffer[5];
-		if (!CreateImage(nWidth, nHeight, 10))return false;
+		if (!CreateImage(nWidth, nHeight, 10))
+			return false;
 		unsigned short *pInputImage = GetImageData();
 		unsigned char *RawLine = (unsigned char *)(pInputRawData);
-		for (i = 0; i < nWidth*nHeight; i += 4)
+		for (i = 0; i < nWidth * nHeight; i += 4)
 		{
 			for (int cnt = 0; cnt < 5; cnt++)
 			{
@@ -533,8 +560,9 @@ bool MultiUshortImage::ConverterRawDataToISPRawData(char *pInputRawData, int nWi
 	}
 	else if (nMIPIRAW == 2)
 	{
-		if (!CreateImage(nWidth, nHeight, 10))return false;
-		//QCOM MIPI10
+		if (!CreateImage(nWidth, nHeight, 10))
+			return false;
+		// QCOM MIPI10
 		for (int y = 0; y < nHeight; y++)
 		{
 			unsigned short *pInputImage = GetImageLine(y);
@@ -561,11 +589,12 @@ bool MultiUshortImage::ConverterRawDataToISPRawData(char *pInputRawData, int nWi
 	}
 	else if (nMIPIRAW == 3)
 	{
-		if (!CreateImage(nWidth, nHeight, 10))return false;
-		//MTK RAW10
+		if (!CreateImage(nWidth, nHeight, 10))
+			return false;
+		// MTK RAW10
 		unsigned short *pInputImage = GetImageData();
 		unsigned char *buffer = (unsigned char *)(pInputRawData);
-		for (int i = 0; i < (nWidth*nHeight) >> 2; i++)
+		for (int i = 0; i < (nWidth * nHeight) >> 2; i++)
 		{
 			int g = buffer[1] & 3;
 			g = (g << 8) | buffer[0];
@@ -589,16 +618,18 @@ bool MultiUshortImage::ConverterRawDataToISPRawData(char *pInputRawData, int nWi
 		return false;
 	}
 }
-bool MultiUshortImage::Load16BitRawDataFromBinFile(char *pFileName, int nWidth, int nHeight, int nBits, bool bHighBit, bool bByteOrder, int nMIPIRAW)//bByteOrderÐ¡¶ËÕý³£¶¼ÊÇÐ¡¶ËÄ£Ê½£¨Ð¡¶Ë×Ö½ÚÐò¾ÍÊÇ×îµÍÓÐÐ§×Ö½ÚÂäÔÚµÍµØÖ·ÉÏµÄ×Ö½Ú´æ·Å·½Ê½£©bHighBit ¸ßµÍÎ»ÓÐÐ§ nMIPIRAW==0±íÊ¾²»ÊÇmipi ÆäËû±íÊ¾²»Í¬mipi
+bool MultiUshortImage::Load16BitRawDataFromBinFile(char *pFileName, int nWidth, int nHeight, int nBits, bool bHighBit, bool bByteOrder, int nMIPIRAW) // bByteOrderÐ¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¡ï¿½ï¿½Ä£Ê½ï¿½ï¿½Ð¡ï¿½ï¿½ï¿½Ö½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð§ï¿½Ö½ï¿½ï¿½ï¿½ï¿½ÚµÍµï¿½Ö·ï¿½Ïµï¿½ï¿½Ö½Ú´ï¿½Å·ï¿½Ê½ï¿½ï¿½bHighBit ï¿½ßµï¿½Î»ï¿½ï¿½Ð§ nMIPIRAW==0ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½mipi ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾ï¿½ï¿½Í¬mipi
 {
-	if (nMIPIRAW == 0)//0±íÊ¾²»ÊÇmipiÆäËû´ú±í²»Í¬mipi
+	if (nMIPIRAW == 0) // 0ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½mipiï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¬mipi
 	{
 		int x, y, g;
 		int mask = (1 << nBits) - 1;
 		int shift = (16 - nBits);
-		if (!CreateImage(nWidth, nHeight, nBits))return false;
+		if (!CreateImage(nWidth, nHeight, nBits))
+			return false;
 		FILE *fp = fopen(pFileName, "rb");
-		if (fp == NULL)return false;
+		if (fp == NULL)
+			return false;
 		for (y = 0; y < nHeight; y++)
 		{
 			unsigned short *wpLine = GetImageLine(y);
@@ -608,15 +639,16 @@ bool MultiUshortImage::Load16BitRawDataFromBinFile(char *pFileName, int nWidth, 
 				fclose(fp);
 				return false;
 			}
-			for (x = 0; x<nWidth; x++)
+			for (x = 0; x < nWidth; x++)
 			{
 				g = wpLine[x];
 				if (!bByteOrder)
 				{
 					g = ((g >> 8) & 255) | ((g & 255) << 8);
 				}
-				if (bHighBit)g = g >> shift;
-				if (g>mask)
+				if (bHighBit)
+					g = g >> shift;
+				if (g > mask)
 				{
 					printf("Pos [%d,%d] Pixel %d>%d\n", x, y, g, mask);
 				}
@@ -629,20 +661,22 @@ bool MultiUshortImage::Load16BitRawDataFromBinFile(char *pFileName, int nWidth, 
 	}
 	else if (nMIPIRAW == 1)
 	{
-		//RAW 10
-		if (!CreateImage(nWidth, nHeight, 10))return false;
+		// RAW 10
+		if (!CreateImage(nWidth, nHeight, 10))
+			return false;
 		SingleUcharImage tmpbuf;
 		tmpbuf.CreateImage(nWidth, nHeight);
 		FILE *fp = fopen(pFileName, "rb");
-		if (fp == NULL)return false;
-		fread(tmpbuf.GetImageData(), 1, nWidth*nHeight/4*5, fp);
+		if (fp == NULL)
+			return false;
+		fread(tmpbuf.GetImageData(), 1, nWidth * nHeight / 4 * 5, fp);
 		fclose(fp);
 		int nProcs = omp_get_num_procs();
-	#pragma omp parallel for num_threads(nProcs) schedule(dynamic,16) 
+#pragma omp parallel for num_threads(nProcs) schedule(dynamic, 16)
 		for (int y = 0; y < nHeight; y++)
 		{
 			unsigned short *pInputImage = GetImageLine(y);
-			unsigned char *pInput = tmpbuf.GetImageData()+y*nWidth*5/4;
+			unsigned char *pInput = tmpbuf.GetImageData() + y * nWidth * 5 / 4;
 			unsigned char Buffer[5];
 			for (int i = 0; i < nWidth; i += 4)
 			{
@@ -666,11 +700,12 @@ bool MultiUshortImage::Load16BitRawDataFromBinFile(char *pFileName, int nWidth, 
 	}
 	else if (nMIPIRAW == 2)
 	{
-		//QCOM MIPI10
+		// QCOM MIPI10
 		int x, y, g;
-		int nStride = (((nWidth * 5) >> 2) + 8)&(~7);
+		int nStride = (((nWidth * 5) >> 2) + 8) & (~7);
 		FILE *fp = fopen(pFileName, "rb");
-		if (fp == NULL)return false;
+		if (fp == NULL)
+			return false;
 		printf("Width=%d Stride=%d\n", nWidth, nStride);
 		if (!CreateImage(nWidth, nHeight, 10))
 		{
@@ -716,17 +751,18 @@ bool MultiUshortImage::Load16BitRawDataFromBinFile(char *pFileName, int nWidth, 
 	}
 	else if (nMIPIRAW == 3)
 	{
-		//MTK RAW10
+		// MTK RAW10
 		int i, buffer[5], g;
 		FILE *fp = fopen(pFileName, "rb");
-		if (fp == NULL)return false;
+		if (fp == NULL)
+			return false;
 		if (!CreateImage(nWidth, nHeight, 10))
 		{
 			fclose(fp);
 			return false;
 		}
 		unsigned short *pInputImage = GetImageData();
-		for (i = 0; i < (nWidth*nHeight)>>2; i++)
+		for (i = 0; i < (nWidth * nHeight) >> 2; i++)
 		{
 			if (fread(buffer, 1, 5, fp) != 5)
 			{
@@ -758,13 +794,14 @@ bool MultiUshortImage::Load16BitRawDataFromBinFile(char *pFileName, int nWidth, 
 }
 bool MultiUshortImage::Load16BitRawDataFromISPRawData(unsigned short *pInputData, int nWidth, int nHeight, int nBits, bool bHighBit, bool bByteOrder, int nMIPIRAW)
 {
-	//RAW 10
-	if (nMIPIRAW==1)
+	// RAW 10
+	if (nMIPIRAW == 1)
 	{
 		unsigned char *datain1 = (unsigned char *)pInputData;
-		if (!CreateImage(nWidth, nHeight, 10))return false;
+		if (!CreateImage(nWidth, nHeight, 10))
+			return false;
 		int nProcs = omp_get_num_procs();
-#pragma omp parallel for num_threads(nProcs) schedule(dynamic,16) 
+#pragma omp parallel for num_threads(nProcs) schedule(dynamic, 16)
 		for (int y = 0; y < nHeight; y++)
 		{
 			unsigned short *pInputImage = GetImageLine(y);
@@ -791,15 +828,16 @@ bool MultiUshortImage::Load16BitRawDataFromISPRawData(unsigned short *pInputData
 	}
 	else if (nMIPIRAW == 0)
 	{
-		//MTK mipiRAW10
+		// MTK mipiRAW10
 		unsigned short mask = (1 << nBits) - 1;
 		int shift = (16 - nBits);
-		if (!CreateImage(nWidth, nHeight, nBits))return false;
+		if (!CreateImage(nWidth, nHeight, nBits))
+			return false;
 #ifdef USE_NEON
 		uint16x8_t vnMask = vdupq_n_u16(mask);
 #endif
 		int nProcs = omp_get_num_procs();
-#pragma omp parallel for num_threads(nProcs) schedule(dynamic,16) 
+#pragma omp parallel for num_threads(nProcs) schedule(dynamic, 16)
 		for (int y = 0; y < nHeight; y++)
 		{
 			unsigned short *wpLine = GetImageLine(y);
@@ -831,7 +869,7 @@ bool MultiUshortImage::ConverterISPRawDataToRawData(unsigned char **pOutData, in
 		int x, y, g;
 		int nShift = (bHighBit) ? (16 - m_nRawBits) : (m_nRawBits - nBits);
 		nLen = m_nWidth * m_nHeight * 2;
-		unsigned short *pbuf=new unsigned short[m_nWidth*m_nHeight];
+		unsigned short *pbuf = new unsigned short[m_nWidth * m_nHeight];
 		*pOutData = (unsigned char *)pbuf;
 		for (y = 0; y < m_nHeight; y++)
 		{
@@ -863,7 +901,7 @@ bool MultiUshortImage::ConverterISPRawDataToRawData(unsigned char **pOutData, in
 	}
 	else if (nMIPIRAW == 1)
 	{
-		//RAW 10
+		// RAW 10
 		if (m_nRawBits != 10)
 		{
 			NormalizeBit(10);
@@ -872,13 +910,13 @@ bool MultiUshortImage::ConverterISPRawDataToRawData(unsigned char **pOutData, in
 		unsigned char *pbuf = new unsigned char[nLen];
 		*pOutData = pbuf;
 		int nProcs = omp_get_num_procs();
-#pragma omp parallel for num_threads(nProcs) schedule(dynamic,16) 
-		for (int y=0;y< m_nHeight;y++)
+#pragma omp parallel for num_threads(nProcs) schedule(dynamic, 16)
+		for (int y = 0; y < m_nHeight; y++)
 		{
-			int  g[4];
-			unsigned char *Buffer = pbuf+ m_nWidth * y * 5 / 4;
+			int g[4];
+			unsigned char *Buffer = pbuf + m_nWidth * y * 5 / 4;
 			unsigned short *pInputImage = GetImageLine(y);
-			for (int x = 0; x < m_nWidth; x+= 4)
+			for (int x = 0; x < m_nWidth; x += 4)
 			{
 				int nShift = 6;
 				Buffer[4] = 0;
@@ -895,17 +933,17 @@ bool MultiUshortImage::ConverterISPRawDataToRawData(unsigned char **pOutData, in
 	}
 	else if (nMIPIRAW == 2)
 	{
-		//QCOM MIPI10
+		// QCOM MIPI10
 		int x, y;
 		unsigned short g[4];
-		int nStride = (((m_nWidth * 5) >> 2) + 8)&(~7);
+		int nStride = (((m_nWidth * 5) >> 2) + 8) & (~7);
 		printf("Width=%d Stride=%d\n", m_nWidth, nStride);
 		if (m_nRawBits != 10)
 		{
 			NormalizeBit(10);
 		}
 		nLen = nStride * m_nHeight;
-		unsigned char *pbuf = new unsigned char[nStride*m_nHeight];
+		unsigned char *pbuf = new unsigned char[nStride * m_nHeight];
 		*pOutData = pbuf;
 		unsigned char *pBuffer = new unsigned char[nStride];
 		unsigned short *pInputImage = GetImageData();
@@ -931,7 +969,7 @@ bool MultiUshortImage::ConverterISPRawDataToRawData(unsigned char **pOutData, in
 	}
 	else if (nMIPIRAW == 3)
 	{
-		//MTK RAW10
+		// MTK RAW10
 		int i;
 		unsigned short g[4];
 		if (m_nRawBits != 10)
@@ -939,11 +977,11 @@ bool MultiUshortImage::ConverterISPRawDataToRawData(unsigned char **pOutData, in
 			NormalizeBit(10);
 		}
 		nLen = m_nWidth * m_nHeight * 5 / 4;
-		unsigned char *pbuf = new unsigned char[m_nWidth*m_nHeight * 5 / 4];
+		unsigned char *pbuf = new unsigned char[m_nWidth * m_nHeight * 5 / 4];
 		*pOutData = pbuf;
 		unsigned char *buffer = pbuf;
 		unsigned short *pInputImage = GetImageData();
-		for (i = 0; i < (m_nWidth*m_nHeight) >> 2; i++, buffer+=5)
+		for (i = 0; i < (m_nWidth * m_nHeight) >> 2; i++, buffer += 5)
 		{
 			g[0] = *(pInputImage++);
 			g[1] = *(pInputImage++);
@@ -974,7 +1012,8 @@ bool MultiUshortImage::Save16BitRawToBinFile(char *pFileName, int nBits, bool bH
 		int x, y, g;
 		int nShift = (bHighBit) ? (16 - m_nRawBits) : (m_nRawBits - nBits);
 		unsigned short *pBuffer = new unsigned short[m_nWidth];
-		if (pBuffer == NULL)return false;
+		if (pBuffer == NULL)
+			return false;
 		FILE *fp = fopen(pFileName, "wb");
 		if (fp == NULL)
 		{
@@ -1013,7 +1052,7 @@ bool MultiUshortImage::Save16BitRawToBinFile(char *pFileName, int nBits, bool bH
 	}
 	else if (nMIPIRAW == 1)
 	{
-		//RAW 10
+		// RAW 10
 		int i, j, g[4];
 		unsigned char Buffer[5];
 		if (m_nRawBits != 10)
@@ -1021,17 +1060,18 @@ bool MultiUshortImage::Save16BitRawToBinFile(char *pFileName, int nBits, bool bH
 			NormalizeBit(10);
 		}
 		FILE *fp = fopen(pFileName, "wb");
-		if (fp == NULL)return false;
+		if (fp == NULL)
+			return false;
 		unsigned short *pInputImage = GetImageData();
-		for (i = 0; i < m_nWidth*m_nHeight; i += 4)
+		for (i = 0; i < m_nWidth * m_nHeight; i += 4)
 		{
 			int nShift = 6;
 			Buffer[4] = 0;
 			for (j = 0; j < 4; j++, nShift -= 2)
 			{
 				g[j] = *(pInputImage++);
-				Buffer[j] =(unsigned char) (g[j] >> 2);
-				Buffer[4] |=(unsigned char) ((g[j] & 3) << nShift);
+				Buffer[j] = (unsigned char)(g[j] >> 2);
+				Buffer[4] |= (unsigned char)((g[j] & 3) << nShift);
 			}
 			if (fwrite(Buffer, 1, 5, fp) != 5)
 			{
@@ -1045,12 +1085,13 @@ bool MultiUshortImage::Save16BitRawToBinFile(char *pFileName, int nBits, bool bH
 	}
 	else if (nMIPIRAW == 2)
 	{
-		//QCOM MIPI10
+		// QCOM MIPI10
 		int x, y;
 		unsigned short g[4];
-		int nStride = (((m_nWidth * 5) >> 2) + 8)&(~7);
+		int nStride = (((m_nWidth * 5) >> 2) + 8) & (~7);
 		FILE *fp = fopen(pFileName, "wb");
-		if (fp == NULL)return false;
+		if (fp == NULL)
+			return false;
 		printf("Width=%d Stride=%d\n", m_nWidth, nStride);
 		if (m_nRawBits != 10)
 		{
@@ -1076,7 +1117,7 @@ bool MultiUshortImage::Save16BitRawToBinFile(char *pFileName, int nBits, bool bH
 				pSrc[1] = (unsigned char)(g[1] >> 2);
 				pSrc[2] = (unsigned char)(g[2] >> 2);
 				pSrc[3] = (unsigned char)(g[3] >> 2);
-				pSrc[4] = (unsigned char)(((g[0] & 3) << 6) | ((g[1] & 3) << 4) | ((g[2] & 3) << 2) | (g[3] & 3));	
+				pSrc[4] = (unsigned char)(((g[0] & 3) << 6) | ((g[1] & 3) << 4) | ((g[2] & 3) << 2) | (g[3] & 3));
 				pSrc += 5;
 			}
 			if (fwrite(pBuffer, 1, nStride, fp) < nStride)
@@ -1092,24 +1133,25 @@ bool MultiUshortImage::Save16BitRawToBinFile(char *pFileName, int nBits, bool bH
 	}
 	else if (nMIPIRAW == 3)
 	{
-		//MTK RAW10
+		// MTK RAW10
 		int i;
 		unsigned char buffer[5];
 		unsigned short g[4];
 		FILE *fp = fopen(pFileName, "wb");
-		if (fp == NULL)return false;
+		if (fp == NULL)
+			return false;
 		if (m_nRawBits != 10)
 		{
 			NormalizeBit(10);
 		}
 		unsigned short *pInputImage = GetImageData();
-		for (i = 0; i < (m_nWidth*m_nHeight) >> 2; i++)
+		for (i = 0; i < (m_nWidth * m_nHeight) >> 2; i++)
 		{
 			g[0] = *(pInputImage++);
 			g[1] = *(pInputImage++);
 			g[2] = *(pInputImage++);
 			g[3] = *(pInputImage++);
-			buffer[0] = (unsigned char) (g[0] & 255);
+			buffer[0] = (unsigned char)(g[0] & 255);
 			buffer[1] = (unsigned char)((g[0] >> 8) & 3);
 			buffer[1] |= (unsigned char)((g[1] & 63) << 2);
 			buffer[2] = (unsigned char)((g[1] >> 6) & 15);
@@ -1152,7 +1194,8 @@ bool MultiUshortImage::Save16BitRawToBitmapFile(char *pFileName, bool bBlackWhit
 			{
 				c = *(pwLine++);
 				c = (c >> nShift);
-				if (c > 255)c = 255;
+				if (c > 255)
+					c = 255;
 				*(pbLine++) = (unsigned char)c;
 				*(pbLine++) = (unsigned char)c;
 				*(pbLine++) = (unsigned char)c;
@@ -1169,15 +1212,18 @@ bool MultiUshortImage::Save16BitRawToBitmapFile(char *pFileName, bool bBlackWhit
 			unsigned short *pwLine = GetImageLine(y);
 			for (x = 0; x < m_nWidth; x += 2)
 			{
-				CFA[0] = pwLine[0];			CFA[1] = pwLine[1];
-				CFA[2] = pwLine[m_nWidth];	CFA[3] = pwLine[m_nWidth + 1];
+				CFA[0] = pwLine[0];
+				CFA[1] = pwLine[1];
+				CFA[2] = pwLine[m_nWidth];
+				CFA[3] = pwLine[m_nWidth + 1];
 				bgr[0] = CFA[nYFlag + nXFlag];
 				bgr[1] = CFA[((nYFlag >> 1) ^ nXFlag) ^ 1];
 				bgr[2] = CFA[(nYFlag ^ 2) + (nXFlag ^ 1)];
 				for (i = 0; i < 3; i++)
 				{
 					bgr[i] = (bgr[i] >> nShift);
-					if (bgr[i] > 255)bgr[i] = 255;
+					if (bgr[i] > 255)
+						bgr[i] = 255;
 				}
 				for (i = 0; i < 3; i++)
 				{
@@ -1193,15 +1239,18 @@ bool MultiUshortImage::Save16BitRawToBitmapFile(char *pFileName, bool bBlackWhit
 			pwLine = GetImageLine(y);
 			for (x = 0; x < m_nWidth; x += 2)
 			{
-				CFA[0] = pwLine[0];			CFA[1] = pwLine[1];
-				CFA[2] = pwLine[m_nWidth];	CFA[3] = pwLine[m_nWidth + 1];
+				CFA[0] = pwLine[0];
+				CFA[1] = pwLine[1];
+				CFA[2] = pwLine[m_nWidth];
+				CFA[3] = pwLine[m_nWidth + 1];
 				bgr[0] = CFA[nYFlag + nXFlag];
 				bgr[1] = CFA[2 + ((nYFlag >> 1) ^ nXFlag)];
 				bgr[2] = CFA[(nYFlag ^ 2) + (nXFlag ^ 1)];
 				for (i = 0; i < 3; i++)
 				{
 					bgr[i] = (bgr[i] >> nShift);
-					if (bgr[i] > 255)bgr[i] = 255;
+					if (bgr[i] > 255)
+						bgr[i] = 255;
 				}
 				for (i = 0; i < 3; i++)
 				{
@@ -1215,7 +1264,8 @@ bool MultiUshortImage::Save16BitRawToBitmapFile(char *pFileName, bool bBlackWhit
 			}
 		}
 	}
-	if (pBGRImage == NULL)return false;
+	if (pBGRImage == NULL)
+		return false;
 	if (!pBGRImage->SaveBGRToBitmapFile(pFileName))
 	{
 		delete pBGRImage;
@@ -1231,30 +1281,31 @@ bool MultiUshortImage::MeanImage5x5()
 	int nChannel = GetImageDim();
 	unsigned int *pHLines[5];
 	int nThread = omp_get_num_procs();
-	unsigned int *pBuffer = new unsigned int[nWidth*nChannel * 5 * nThread];
-	if (pBuffer == NULL)return false;
-	int  loop = 0;
+	unsigned int *pBuffer = new unsigned int[nWidth * nChannel * 5 * nThread];
+	if (pBuffer == NULL)
+		return false;
+	int loop = 0;
 	int strnWidth = nWidth * nChannel;
-#pragma omp parallel for num_threads(nThread) firstprivate(loop) private(pHLines) 
+#pragma omp parallel for num_threads(nThread) firstprivate(loop) private(pHLines)
 	for (int y = 0; y < nHeight; y++)
 	{
 		if (loop == 0)
 		{
 			int nThreadId = omp_get_thread_num();
-			pHLines[0] = pBuffer + 5 * nWidth*nThreadId*nChannel;
+			pHLines[0] = pBuffer + 5 * nWidth * nThreadId * nChannel;
 			pHLines[1] = pHLines[0] + strnWidth;
 			pHLines[2] = pHLines[1] + strnWidth;
 			pHLines[3] = pHLines[2] + strnWidth;
 			pHLines[4] = pHLines[3] + strnWidth;
-			HAvg5Line(GetImageLine(y-2), pHLines[0], nChannel, nWidth);
+			HAvg5Line(GetImageLine(y - 2), pHLines[0], nChannel, nWidth);
 			HAvg5Line(GetImageLine(y - 1), pHLines[1], nChannel, nWidth);
 			HAvg5Line(GetImageLine(y - 0), pHLines[2], nChannel, nWidth);
-			HAvg5Line(GetImageLine(y +1), pHLines[3], nChannel, nWidth);
+			HAvg5Line(GetImageLine(y + 1), pHLines[3], nChannel, nWidth);
 			loop++;
 		}
-		HAvg5Line(GetImageLine(y +2), pHLines[4], nChannel, nWidth);
+		HAvg5Line(GetImageLine(y + 2), pHLines[4], nChannel, nWidth);
 		VAvg5Line(pHLines, GetImageLine(y), nChannel, nWidth);
-		unsigned int  *pTemp0 = pHLines[0];
+		unsigned int *pTemp0 = pHLines[0];
 		pHLines[0] = pHLines[1];
 		pHLines[1] = pHLines[2];
 		pHLines[2] = pHLines[3];
@@ -1271,25 +1322,26 @@ bool MultiUshortImage::MeanImage3x3()
 	int nChannel = GetImageDim();
 	unsigned short *pHLines[3];
 	int nThread = omp_get_num_procs();
-	unsigned short *pBuffer = new unsigned short[nWidth*nChannel * 3 * nThread];
-	if (pBuffer == NULL)return false;
-	int  loop = 0;
-	#pragma omp parallel for num_threads(nThread) firstprivate(loop) private(pHLines) 
+	unsigned short *pBuffer = new unsigned short[nWidth * nChannel * 3 * nThread];
+	if (pBuffer == NULL)
+		return false;
+	int loop = 0;
+#pragma omp parallel for num_threads(nThread) firstprivate(loop) private(pHLines)
 	for (int y = 0; y < nHeight; y++)
 	{
 		if (loop == 0)
 		{
 			int nThreadId = omp_get_thread_num();
-			pHLines[0] = pBuffer + 3 * nWidth*nThreadId*nChannel;
+			pHLines[0] = pBuffer + 3 * nWidth * nThreadId * nChannel;
 			pHLines[1] = pHLines[0] + nWidth * nChannel;
 			pHLines[2] = pHLines[1] + nWidth * nChannel;
-			HAvg3Line(GetImageLine(y-1), pHLines[0], nChannel, nWidth);
+			HAvg3Line(GetImageLine(y - 1), pHLines[0], nChannel, nWidth);
 			HAvg3Line(GetImageLine(y), pHLines[1], nChannel, nWidth);
 			loop++;
 		}
-		HAvg3Line(GetImageLine(y+1), pHLines[2], nChannel, nWidth);
+		HAvg3Line(GetImageLine(y + 1), pHLines[2], nChannel, nWidth);
 		VAvg3Line(pHLines, GetImageLine(y), nChannel, nWidth);
-		unsigned short  *pTemp0 = pHLines[0];
+		unsigned short *pTemp0 = pHLines[0];
 		pHLines[0] = pHLines[1];
 		pHLines[1] = pHLines[2];
 		pHLines[2] = pTemp0;
@@ -1297,17 +1349,18 @@ bool MultiUshortImage::MeanImage3x3()
 	delete[] pBuffer;
 	return true;
 }
-bool MultiUshortImage::GetSingleChannelImage(MultiUshortImage * pOutImage,int ch)
+bool MultiUshortImage::GetSingleChannelImage(MultiUshortImage *pOutImage, int ch)
 {
 	int nWidth = GetImageWidth();
 	int nHeight = GetImageHeight();
 	int nCh = GetImageDim();
 	if (pOutImage->GetImageWidth() != nWidth || pOutImage->GetImageHeight() != nHeight)
 	{
-		if (!pOutImage->CreateImage(nWidth, nHeight,1,16))return false;
+		if (!pOutImage->CreateImage(nWidth, nHeight, 1, 16))
+			return false;
 	}
 	int nProcs = omp_get_num_procs();
-#pragma omp parallel for  num_threads(nProcs) schedule(dynamic,16)  
+#pragma omp parallel for num_threads(nProcs) schedule(dynamic, 16)
 	for (int y = 0; y < nHeight; y++)
 	{
 		unsigned short *pInLine = GetImageLine(y);
@@ -1320,17 +1373,18 @@ bool MultiUshortImage::GetSingleChannelImage(MultiUshortImage * pOutImage,int ch
 	}
 	return true;
 }
-bool MultiUshortImage::ReplaceSingleChannelImage(MultiUshortImage * pInputImage,int ch)
+bool MultiUshortImage::ReplaceSingleChannelImage(MultiUshortImage *pInputImage, int ch)
 {
 	int nWidth = GetImageWidth();
 	int nHeight = GetImageHeight();
 	int nCh = GetImageDim();
 	if (pInputImage->GetImageWidth() != nWidth || pInputImage->GetImageHeight() != nHeight)
 	{
-		if (!pInputImage->CreateImage(nWidth, nHeight,1,16))return false;
+		if (!pInputImage->CreateImage(nWidth, nHeight, 1, 16))
+			return false;
 	}
 	int nProcs = omp_get_num_procs();
-#pragma omp parallel for  num_threads(nProcs) schedule(dynamic,16)  
+#pragma omp parallel for num_threads(nProcs) schedule(dynamic, 16)
 	for (int y = 0; y < nHeight; y++)
 	{
 		unsigned short *pOutLine = GetImageLine(y);
@@ -1351,19 +1405,19 @@ bool MultiUshortImage::Bilateral5x5SingleImage(int nThre)
 	MultiUshortImage pOutImage;
 	if (pOutImage.GetImageWidth() != nWidth || pOutImage.GetImageHeight() != nHeight)
 	{
-		if (!pOutImage.CreateImage(nWidth, nHeight,1,16))return false;
+		if (!pOutImage.CreateImage(nWidth, nHeight, 1, 16))
+			return false;
 	}
 	const int nMask[5][5] =
-	{
-		{ 1,  4,  6,  4, 1},
-		{ 4, 16, 24, 16, 4},
-		{ 6, 24, 36, 24, 6},
-		{ 4, 16, 24, 16, 4},
-		{ 1,  4,  6,  4, 1}
-	};
-	unsigned int nInvNoise = (1U << 28) / (nThre*nThre);
+		{
+			{1, 4, 6, 4, 1},
+			{4, 16, 24, 16, 4},
+			{6, 24, 36, 24, 6},
+			{4, 16, 24, 16, 4},
+			{1, 4, 6, 4, 1}};
+	unsigned int nInvNoise = (1U << 28) / (nThre * nThre);
 	int nThread = omp_get_num_procs();
-#pragma omp parallel for num_threads(nThread) 
+#pragma omp parallel for num_threads(nThread)
 	for (int y = 0; y < nHeight; y++)
 	{
 		int i, j, x, Y0, Y;
@@ -1378,14 +1432,16 @@ bool MultiUshortImage::Bilateral5x5SingleImage(int nThre)
 			sumW = 0;
 			for (i = -2; i <= 2; i++)
 			{
-				if (y + i < 0 || y + i >= nHeight)continue;
+				if (y + i < 0 || y + i >= nHeight)
+					continue;
 				for (j = -2; j <= 2; j++)
 				{
-					if (x + j < 0 || x + j >= nWidth)continue;
-					Y = pIn[i*nWidth + j];
+					if (x + j < 0 || x + j >= nWidth)
+						continue;
+					Y = pIn[i * nWidth + j];
 					dY = Y - Y0;
 					dY *= dY;
-					W = (int)(8 - ((dY*nInvNoise) >> 28));
+					W = (int)(8 - ((dY * nInvNoise) >> 28));
 					if (W >= 0)
 					{
 						W = nMask[i + 2][j + 2] << W;
@@ -1398,27 +1454,27 @@ bool MultiUshortImage::Bilateral5x5SingleImage(int nThre)
 			pIn++;
 		}
 	}
-	memcpy(GetImageData(), pOutImage.GetImageData(),nWidth*nHeight*2);
+	memcpy(GetImageData(), pOutImage.GetImageData(), nWidth * nHeight * 2);
 	return true;
 }
-void MultiUshortImage::GetMultiImageIntegralUSData(CImageData_UINT32 *Integral, int Width, int Height,int dim)
+void MultiUshortImage::GetMultiImageIntegralUSData(CImageData_UINT32 *Integral, int Width, int Height, int dim)
 {
-	unsigned int *ColSum = (unsigned int *)calloc(Width*dim, sizeof(unsigned int));        //    ÓÃµÄcallocº¯ÊýÅ¶£¬×Ô¶¯ÄÚ´æÇå0
-	memset(Integral->GetImageData(), 0, (Width + 1)*dim * sizeof(unsigned int));
+	unsigned int *ColSum = (unsigned int *)calloc(Width * dim, sizeof(unsigned int)); //    ï¿½Ãµï¿½callocï¿½ï¿½ï¿½ï¿½Å¶ï¿½ï¿½ï¿½Ô¶ï¿½ï¿½Ú´ï¿½ï¿½ï¿½0
+	memset(Integral->GetImageData(), 0, (Width + 1) * dim * sizeof(unsigned int));
 	for (int y = 0; y < Height; y++)
 	{
-		unsigned short *LinePS = GetImageLine(y);// pInData + y * Stride;
-		unsigned int *LinePD = Integral->GetImageLine(y + 1) + dim;// +(y + 1) * (Width + 1) + 1;//»ý·ÖÍ¼1 1¿ªÊ¼Ò»ÐÐÆðÊ¼
-		for (int k=0;k<dim;k++)
+		unsigned short *LinePS = GetImageLine(y);					// pInData + y * Stride;
+		unsigned int *LinePD = Integral->GetImageLine(y + 1) + dim; // +(y + 1) * (Width + 1) + 1;//ï¿½ï¿½ï¿½ï¿½Í¼1 1ï¿½ï¿½Ê¼Ò»ï¿½ï¿½ï¿½ï¿½Ê¼
+		for (int k = 0; k < dim; k++)
 		{
-			LinePD[-dim+k] = 0;
+			LinePD[-dim + k] = 0;
 		}
-		for (int x = 0; x < Width; x++)//ÐÐ·½ÏòµÄ»ý·ÖÀÛ¼Ó
+		for (int x = 0; x < Width; x++) // ï¿½Ð·ï¿½ï¿½ï¿½Ä»ï¿½ï¿½ï¿½ï¿½Û¼ï¿½
 		{
-			for (int k=0;k<dim;k++)
+			for (int k = 0; k < dim; k++)
 			{
-				ColSum[x*dim+k] += LinePS[x*dim+k];//ColSumÍ³¼ÆµÄÊÇµÄÀÛ¼ÓLinePSÍ³¼ÆÐÐµÄÀÛ¼Ó
-				LinePD[x*dim+k] = LinePD[(x - 1)*dim+k] + ColSum[x*dim+k];
+				ColSum[x * dim + k] += LinePS[x * dim + k]; // ColSumÍ³ï¿½Æµï¿½ï¿½Çµï¿½ï¿½Û¼ï¿½LinePSÍ³ï¿½ï¿½ï¿½Ðµï¿½ï¿½Û¼ï¿½
+				LinePD[x * dim + k] = LinePD[(x - 1) * dim + k] + ColSum[x * dim + k];
 			}
 		}
 	}
@@ -1429,12 +1485,12 @@ bool MultiUshortImage::GetEachBlockAverageValue(int nRadius)
 	int Width = GetImageWidth();
 	int Height = GetImageHeight();
 	int dim = GetImageDim();
-	int Imagesize = Width * Height*dim * sizeof(unsigned short);
+	int Imagesize = Width * Height * dim * sizeof(unsigned short);
 	CImageData_UINT32 Integral;
 	Integral.SetImageSize((Width + 1), (Height + 1), dim);
 	this->GetMultiImageIntegralUSData(&Integral, Width, Height, dim);
 	int nProcs = omp_get_num_procs();
-#pragma omp parallel for  num_threads(nProcs) schedule(dynamic,16)  
+#pragma omp parallel for num_threads(nProcs) schedule(dynamic, 16)
 	for (int Y = 0; Y < Height; Y++)
 	{
 		int Y1 = max(Y - nRadius, 0);
@@ -1447,10 +1503,10 @@ bool MultiUshortImage::GetEachBlockAverageValue(int nRadius)
 			int X1 = max(X - nRadius, 0);
 			int X2 = min(X + nRadius + 1, Width);
 			unsigned int PixelCount = (X2 - X1) * (Y2 - Y1);
-			for (int k=0;k< dim;k++)
+			for (int k = 0; k < dim; k++)
 			{
-				unsigned int Sum = LineP2[X2*dim+k] - LineP1[X2*dim+k] - LineP2[X1*dim + k] + LineP1[X1*dim + k];
-				LinePD[X*dim + k] = (Sum + (PixelCount >> 1)) / PixelCount;
+				unsigned int Sum = LineP2[X2 * dim + k] - LineP1[X2 * dim + k] - LineP2[X1 * dim + k] + LineP1[X1 * dim + k];
+				LinePD[X * dim + k] = (Sum + (PixelCount >> 1)) / PixelCount;
 			}
 		}
 	}
@@ -1463,9 +1519,12 @@ bool MultiUshortImage::SaveSingleChannelToBitmapFile(char *pFileName, int nChann
 	int nHeight = GetImageHeight();
 	int nCh = GetImageDim();
 	SingleUcharImage YImage;
-	if (!YImage.CreateImage(nWidth, nHeight))return false;
-	if (nChannel < 0)nChannel = 0;
-	if (nChannel >= nCh)nChannel = nCh - 1;
+	if (!YImage.CreateImage(nWidth, nHeight))
+		return false;
+	if (nChannel < 0)
+		nChannel = 0;
+	if (nChannel >= nCh)
+		nChannel = nCh - 1;
 	E = 0;
 	for (y = 0; y < nHeight; y++)
 	{
@@ -1473,15 +1532,55 @@ bool MultiUshortImage::SaveSingleChannelToBitmapFile(char *pFileName, int nChann
 		unsigned char *pOutLine = YImage.GetImageLine(y);
 		for (x = 0; x < nWidth; x++)
 		{
-			Y = pInLine[nChannel];	
+			Y = pInLine[nChannel];
 			Y = Y * nOutScale + E;
 			tY = Y / nInScale;
 			E = Y - tY * nInScale;
 			Y = tY + nOffset;
-			if (Y < 0)Y = 0;	if (Y > 255)Y = 255;
+			if (Y < 0)
+				Y = 0;
+			if (Y > 255)
+				Y = 255;
 			*(pOutLine++) = (unsigned char)Y;
 			pInLine += nCh;
 		}
 	}
 	return YImage.SaveGrayToBitmapFile(pFileName);
 }
+// bool MultiUshortImage::SaveSingleChannelToBitmapFile(
+// 	char *pFileName,
+// 	int nChannel,
+// 	int nInScale,
+// 	int nOutScale,
+// 	int nOffset)
+// {
+// 	if (nInScale <= 0)
+// 		return false;
+
+// 	int width = GetImageWidth();
+// 	int height = GetImageHeight();
+// 	int ch = GetImageDim();
+
+// 	nChannel = std::max(0, std::min(nChannel, ch - 1));
+
+// 	SingleUcharImage out;
+// 	if (!out.CreateImage(width, height))
+// 		return false;
+
+// 	for (int y = 0; y < height; y++)
+// 	{
+// 		unsigned short *src = GetImageLine(y);
+// 		unsigned char *dst = out.GetImageLine(y);
+
+// 		for (int x = 0; x < width; x++)
+// 		{
+// 			int v = src[nChannel];
+// 			v = v * nOutScale / nInScale + nOffset;
+// 			v = std::max(0, std::min(255, v));
+// 			dst[x] = (unsigned char)v;
+// 			src += ch;
+// 		}
+// 	}
+
+// 	return out.SaveGrayToBitmapFile(pFileName);
+// }
